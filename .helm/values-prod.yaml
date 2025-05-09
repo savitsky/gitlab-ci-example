@@ -1,0 +1,44 @@
+global:
+  www: false
+  auth: false
+  credentials: ""
+  replicaCount: 1
+  zone: example.com
+  domainOverride: api.example.com
+  isAPIServicesEnabled: false
+  minio:
+    host: 
+    user: 
+    bucket: 
+    password: 
+    accessKey: 
+    secretKey: 
+
+deploy:
+  api: true
+  some-service: false
+  mongo: true
+  rabbitmq: true
+  ingress: true
+  sharedStorage: true
+
+services:
+  rabbitmq:
+    name: rabbitmq
+    port_main: 5672
+    port_ui: 15672
+    user: user
+    password: password
+    storage: 10Gi
+  mongo:
+    name: mongo
+    userName: user
+    userPassword: password
+    port: 27017
+    storageSize: 50Gi
+    volumeName: mongo-data
+    storageClassName: nfs-client
+  api:
+    name: api
+    port: 3251
+    command: ["node", "/app/dist/scripts/server.js"]

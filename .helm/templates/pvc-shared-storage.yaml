@@ -1,0 +1,13 @@
+{{- if .Values.deploy.sharedStorage }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.werf.name }}-{{ .Values.werf.env }}-shared-storage
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: nfs-client
+{{- end }}

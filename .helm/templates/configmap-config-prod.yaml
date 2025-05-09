@@ -1,0 +1,15 @@
+{{- if .Values.deploy.api }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: main-conf-{{ .Values.werf.env }}
+data:
+  config.js: |
+   module.exports = {
+       host: 'http://{{ $.Values.global.url }}',
+       server_port: {{ $.Values.services.api.port }},
+       mongo_url: '{{ $.Values.services.mongo.userName }}:{{ $.Values.services.mongo.userPassword }}@{{ .Values.services.mongo.name }}-{{ .Values.werf.env }}-service.api-v1-{{ .Values.werf.env }}.svc.cluster.local:{{ .Values.services.mongo.port }}/?authSource=admin',
+       some_service_host: 'http://{{ $.Values.services.some_service.name }}',
+       some_service_port: {{ $.Values.services.some_service.port }}
+       }
+{{- end }}

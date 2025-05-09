@@ -1,0 +1,47 @@
+{{- if .Values.deploy.api }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.services.api.name }}-{{ .Values.werf.env }}-deployment
+spec:
+  replicas: {{ $.Values.global.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.services.api.name }}
+      env: {{ .Values.werf.env }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.api.name }}
+        env: {{ .Values.werf.env }}
+        logging: disabled
+      annotations:
+        {{- include "deployment.configmap" . | nindent 8 }}
+        {{- include "anotations" . | indent 8 }}
+    spec:
+      {{- include "node.selector" . | indent 6 }}
+      serviceAccountName: default
+      containers:
+      - name: {{ .Values.services.api.name }}
+        image: {{ .Values.werf.image.api }}
+        command:
+           {{- toYaml $.Values.services.api.command | nindent 8 }}
+        ports:
+          - name: api-port
+            containerPort: {{ $.Values.services.api.port }}
+        volumeMounts:
+          - name: main-conf-{{ .Values.werf.env }}
+            subPath: config.js
+            mountPath: /app/dist/config.js
+          - name: shared-storage
+            mountPath: /storage
+      {{- include "image.secrets" . | indent 6 }}
+      volumes:
+        - name: shared-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.werf.name }}-{{ .Values.werf.env }}-shared-storage
+        - name: main-conf-{{ .Values.werf.env }}
+          configMap:
+            name: main-conf-{{ .Values.werf.env }}
+      {{- include "node.tolerations" . | indent 6 }}
+{{- end }}

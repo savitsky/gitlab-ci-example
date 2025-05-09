@@ -1,0 +1,18 @@
+{{- if .Values.deploy.some-service }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.some-service.name }}-service
+  labels:
+    app: {{ .Values.services.some-service.name }}
+    env: {{ .Values.werf.env }}
+spec:
+  selector:
+    app: {{ .Values.services.some-service.name }}
+    env: {{ .Values.werf.env }}
+  ports:
+    - name: some-service-port
+      protocol: TCP
+      port: {{ .Values.services.some-service.port }}
+      targetPort: {{ .Values.services.some-service.port }}
+{{- end }}

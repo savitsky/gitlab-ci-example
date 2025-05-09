@@ -1,0 +1,20 @@
+FROM node:20-bullseye as builder
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+COPY patches ./patches
+RUN npm run postinstall || true && npm cache clean --force
+COPY . .
+COPY babel.config.js .
+RUN npm run compile
+
+FROM node:20-slim
+
+WORKDIR /app
+
+COPY --from=builder /app/package*.json ./
+RUN npm install --omit=dev
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/scripts ./scripts

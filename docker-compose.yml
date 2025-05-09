@@ -1,0 +1,64 @@
+
+services:
+  api:
+    image: example:latest
+    ports:
+      - "3251:3251"
+    networks:
+      - backend
+    command: ["node", "dist/scripts/server.js"]
+    depends_on:
+      - mongo
+      - rabbitmq
+    secrets:
+      - source: "config"
+        target: "/app/dist/config.js"
+    volumes:
+      - ./data/storage:/storage
+  listener:
+    image: example:latest
+    networks:
+      - backend
+    command: ["node", "dist/scripts/listener.js"]
+    depends_on:
+      - mongo
+      - rabbitmq
+    secrets:
+      - source: "config"
+        target: "/app/dist/config.js"
+  sender:
+    image: example:latest
+    networks:
+      - backend
+    command: ["node", "dist/scripts/sender.js"]
+    depends_on:
+      - mongo
+      - rabbitmq
+    secrets:
+      - source: "config"
+        target: "/app/dist/config.js"
+
+  mongo:
+    image: mongo:3.2
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - backend
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - ./data/rabbitmq:/data
+    networks:
+      - backend
+networks:
+  backend:
+volumes:
+  mongodata:
+secrets:
+  config:
+    file: app/config.js

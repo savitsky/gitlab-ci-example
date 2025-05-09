@@ -1,0 +1,14 @@
+ARG ALPINE_IMAGE
+
+FROM ${ALPINE_IMAGE} as minio
+
+RUN apk add --no-cache openssh-client curl bash rsync
+RUN curl -sO https://dl.min.io/client/mc/release/linux-amd64/mc && chmod +x mc && mv mc /usr/local/bin/mc
+
+ENV KUBECTL_VERSION="v1.32.2"
+RUN curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
+    chmod +x kubectl && \
+    mv kubectl /usr/local/bin/kubectl
+
+COPY ./scripts/backup.sh /usr/local/bin/backup.sh
+RUN chmod +x /usr/local/bin/backup.sh

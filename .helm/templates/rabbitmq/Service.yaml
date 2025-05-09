@@ -1,0 +1,22 @@
+{{- if .Values.deploy.rabbitmq }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.rabbitmq.name }}-{{ .Values.werf.env }}
+  labels:
+    app: {{ .Values.services.rabbitmq.name }}-{{ .Values.werf.env }}
+    env: {{ .Values.werf.env }}
+spec:
+  selector:
+    app: {{ .Values.services.rabbitmq.name }}-{{ .Values.werf.env }}
+    env: {{ .Values.werf.env }}
+  ports:
+    - name: port_main
+      protocol: TCP
+      port: {{ $.Values.services.rabbitmq.port_main }}
+      targetPort: {{ $.Values.services.rabbitmq.port_main }}
+    - name: port_ui
+      protocol: TCP
+      port: {{ $.Values.services.rabbitmq.port_ui }}
+      targetPort: {{ $.Values.services.rabbitmq.port_ui }}
+{{- end }}

@@ -1,0 +1,11 @@
+{{- if .Values.deploy.rabbitmq }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.services.rabbitmq.name }}-config
+data:
+  rabbitmq.conf: |
+    listeners.tcp.default = {{ .Values.services.rabbitmq.port_main }}
+    management.listener.port = {{ .Values.services.rabbitmq.port_ui }}
+    management.listener.ip   = 0.0.0.0
+{{- end }}

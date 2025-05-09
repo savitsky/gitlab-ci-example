@@ -1,0 +1,11 @@
+docker-compose.yml
+data
+.git
+node_modules
+dist
+test
+*.log
+*.md
+*.yaml
+*.yml
+.dockerignore

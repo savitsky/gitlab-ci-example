@@ -1,0 +1,56 @@
+{{- if .Values.deploy.rabbitmq }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.services.rabbitmq.name }}-StatefulSet
+  labels:
+    app: {{ .Values.services.rabbitmq.name }}-{{ .Values.werf.env }}
+    env: {{ .Values.werf.env }}
+    statefulset: {{ .Values.services.rabbitmq.name }}-{{ .Values.werf.env }}-rabbitmq
+spec:
+  replicas: 1
+  serviceName: {{ .Values.services.rabbitmq.name }}-{{ .Values.werf.env }}
+  selector:
+    matchLabels:
+      app: {{ .Values.services.rabbitmq.name }}-{{ .Values.werf.env }}
+      env: {{ .Values.werf.env }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.services.rabbitmq.name }}-{{ .Values.werf.env }}
+        env: {{ .Values.werf.env }}
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: rabbitmq
+        image: {{ .Values.werf.image.rabbitmq }}
+        ports:
+        - containerPort: {{ .Values.services.rabbitmq.port_main }}
+          name: amqp
+        - containerPort: {{ .Values.services.rabbitmq.port_ui }}
+          name: management
+        envFrom:
+          - secretRef:
+              name: {{ .Values.services.rabbitmq.name }}-secret
+        volumeMounts:
+        - name: rabbitmq-data
+          mountPath: /var/lib/rabbitmq
+        - name: rabbitmq-config
+          mountPath: /etc/rabbitmq/rabbitmq.conf
+          subPath: rabbitmq.conf
+        {{- include "rabbitmq.livenessProbe" . | indent 8 }}
+        {{- include "rabbitmq.readinessProbe" . | indent 8 }}
+      volumes:
+      - name: rabbitmq-config
+        configMap:
+          name: {{ .Values.services.rabbitmq.name }}-config
+  volumeClaimTemplates:
+  - metadata:
+      name: rabbitmq-data
+    spec:
+      accessModes: ["ReadWriteMany"]
+      storageClassName: "nfs-client"
+      resources:
+        requests:
+          storage: {{ .Values.services.rabbitmq.storage }}
+{{- end }}

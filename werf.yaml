@@ -1,0 +1,41 @@
+configVersion: 1
+project: example
+---
+image: rabbitmq
+from: rabbitmq:3.11-management
+---
+image: mongo
+from: mongo:4.4
+---
+image: build
+from: node:20-bullseye
+---
+image: run
+from: node:20-bullseye-slim
+---
+image: alpine
+from: alpine:3.21.3
+---
+image: api
+dockerfile: Dockerfile
+context: .
+args:
+  ENV_NAME: {{ if eq .Env "dev" }}development{{ else }}production{{ end }}
+dependencies:
+  - image: build
+    imports:
+      - type: ImageName
+        targetBuildArg: NODE_IMAGE_BUILD
+  - image: run
+    imports:
+      - type: ImageName
+        targetBuildArg: NODE_IMAGE_RUN
+---
+image: minio
+dockerfile: Dockerfile_minio
+context: .
+dependencies:
+  - image: alpine
+    imports:
+      - type: ImageName
+        targetBuildArg: ALPINE_IMAGE
